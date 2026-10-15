@@ -1,0 +1,16 @@
+{
+  "name": "resume",
+  "version": "1.0.0",
+  "private": true,
+  "description": "个人简历动态更新系统",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w frontend",
+    "build:frontend": "npm run build -w frontend",
+    "dev:backend": "cd backend && go run .",
+    "build:backend": "cd backend && go build -o dist/resume-server ."
+  }
+}
+
