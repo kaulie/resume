@@ -27,6 +27,7 @@ func (a *app) writeErr(w http.ResponseWriter, status int, msg string) {
 func (a *app) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", a.handleHealth)
+	mux.HandleFunc("GET /health", a.handleHealth)
 	mux.HandleFunc("GET /api/meta", a.handleMeta)
 
 	mux.HandleFunc("GET /api/resumes", a.handleListResumes)
@@ -57,6 +58,9 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("GET /api/export", a.handleExport)
 	mux.HandleFunc("GET /api/settings", a.handleGetSettings)
 	mux.HandleFunc("PUT /api/settings", a.handlePutSettings)
+
+	// 前端静态资源（SPA fallback）—— 放在最后，作为 catch-all。
+	a.registerStatic(mux)
 
 	return a.cors(mux)
 }

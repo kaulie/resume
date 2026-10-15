@@ -5,6 +5,12 @@ node_modules/
 dist/
 build/
 backend/dist/
+outputs/
+
+# Go build caches (created by build.sh, isolated in-repo)
+.gomodcache/
+.gocache/
+.gopath/
 
 # Go
 backend/resume-server
