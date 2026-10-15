@@ -145,7 +145,7 @@ export default function Optimize() {
 function Preview({ content }: { content: ResumeVersion['content'] }) {
   return (
     <div className="space-y-4">
-      {content.sections.map((sec, i) => (
+      {(content.sections || []).map((sec, i) => (
         <div key={i}>
           <div className="mb-1 text-sm font-semibold text-slate-700">{sec.title}</div>
           <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">

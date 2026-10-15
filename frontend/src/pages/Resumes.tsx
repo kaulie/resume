@@ -7,6 +7,7 @@ export default function Resumes() {
   const [selected, setSelected] = useState<Resume | null>(null);
   const [draft, setDraft] = useState<ResumeContent | null>(null);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -19,9 +20,13 @@ export default function Resumes() {
   async function onUpload(file: File) {
     setBusy(true);
     setError('');
+    setNotice('');
     try {
       const r = await api.uploadResume(file);
       await load();
+      if (!r.sourceText || !r.sourceText.trim()) {
+        setNotice('该文件未提取到文字内容：可能是扫描件/图片型 PDF。建议上传文本型 PDF，或改用 docx / md / txt。');
+      }
       openEditor(r.id);
     } catch (e: any) {
       setError(e.message || '上传失败');
@@ -86,6 +91,7 @@ export default function Resumes() {
       </div>
 
       {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
+      {notice && <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700">{notice}</div>}
 
       <div className="space-y-3">
         {resumes.length === 0 && (
@@ -164,7 +170,7 @@ function EditorModal({
         </div>
 
         <div className="mt-4 space-y-4">
-          {draft.sections.map((sec, si) => (
+          {(draft.sections || []).map((sec, si) => (
             <div key={si} className="rounded-lg border border-slate-200 p-3">
               <input
                 className="input mb-2 font-medium"

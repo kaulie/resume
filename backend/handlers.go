@@ -101,6 +101,7 @@ func scanResume(row pgx.Row) (Resume, error) {
 		return r, err
 	}
 	_ = json.Unmarshal(content, &r.Content)
+	normalizeContent(&r.Content)
 	r.CreatedAt = createdAt.Format(time.RFC3339Nano)
 	r.UpdatedAt = updatedAt.Format(time.RFC3339Nano)
 	return r, nil
@@ -123,6 +124,7 @@ func (a *app) handleListResumes(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		_ = json.Unmarshal(content, &r.Content)
+		normalizeContent(&r.Content)
 		r.CreatedAt = createdAt.Format(time.RFC3339Nano)
 		r.UpdatedAt = updatedAt.Format(time.RFC3339Nano)
 		out = append(out, r)
