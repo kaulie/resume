@@ -18,6 +18,7 @@ func loadResumeContent(ctx context.Context, a *app, id string) (ResumeContent, e
 	}
 	var c ResumeContent
 	_ = json.Unmarshal(raw, &c)
+	normalizeContent(&c)
 	return c, nil
 }
 

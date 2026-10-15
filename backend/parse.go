@@ -3,10 +3,15 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"html"
 	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/ledongthuc/pdf"
 )
@@ -73,7 +78,50 @@ func extractDocxText(data []byte) (string, error) {
 	return "", nil
 }
 
+func findPDFTextHelper() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	p := filepath.Join(filepath.Dir(exe), "pdftext")
+	if st, err := os.Stat(p); err == nil && !st.IsDir() {
+		return p
+	}
+	return ""
+}
+
 func extractPDFText(data []byte) (string, error) {
+	// 优先用 macOS 原生 PDFKit（对中文/CID 字体 PDF 更可靠），失败再退回纯 Go 解析器。
+	if helper := findPDFTextHelper(); helper != "" {
+		if text, err := extractPDFViaHelper(helper, data); err == nil && strings.TrimSpace(text) != "" {
+			return text, nil
+		}
+	}
+	return extractPDFViaGo(data)
+}
+
+func extractPDFViaHelper(helper string, data []byte) (string, error) {
+	tmp, err := os.CreateTemp("", "resume-*.pdf")
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(tmp.Name())
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return "", err
+	}
+	tmp.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, helper, tmp.Name()).Output()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+func extractPDFViaGo(data []byte) (string, error) {
 	r, err := pdf.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return "", err
@@ -144,7 +192,7 @@ func textToContent(text string) ResumeContent {
 	content := ResumeContent{Name: "", Title: "", Contact: "", Summary: "", Sections: []Section{}}
 
 	var contactParts []string
-	var sections []Section
+	sections := []Section{}
 	var active *Section
 
 	for _, line := range lines {

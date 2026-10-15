@@ -100,3 +100,11 @@ type Settings struct {
 	LLMAPIKey   string `json:"llmApiKey"`
 	PDFFontPath string `json:"pdfFontPath"`
 }
+
+// normalizeContent 兜底：历史数据里 sections 可能是 null（旧版解析），
+// 统一成空数组，避免前端对 null 调 map 报错。
+func normalizeContent(c *ResumeContent) {
+	if c.Sections == nil {
+		c.Sections = []Section{}
+	}
+}

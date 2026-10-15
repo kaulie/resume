@@ -31,6 +31,11 @@ echo "[build] version=${VERSION}"
 # Backend (Go). Respects GOOS/GOARCH injected by the platform for remote targets.
 (cd backend && go build -trimpath -o "${OUT}/bin/resume-server" .)
 
+# PDF text extractor (macOS PDFKit) — optional; backend falls back to its own parser if absent.
+if command -v swiftc >/dev/null 2>&1; then
+  swiftc -O tools/pdftext.swift -o "${OUT}/bin/pdftext" || echo "[build][warn] pdftext 编译失败（不影响主流程）" >&2
+fi
+
 # Frontend (React). npm ci uses the committed package-lock.json for reproducible builds.
 (cd frontend && npm ci --no-audit --no-fund --prefer-offline && npm run build)
 cp -r frontend/dist "${OUT}/web"
