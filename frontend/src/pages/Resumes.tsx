@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Upload, Eye, Trash2, Save, X, FileText } from 'lucide-react';
+import { Upload, Eye, Trash2, Save, X, FileText, Plus } from 'lucide-react';
 import { api, Resume, ResumeContent } from '../api';
 
 export default function Resumes() {
@@ -190,6 +190,21 @@ function EditorModal({
                   setDraft({ ...draft, sections });
                 }}
               />
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-xs text-slate-400">{sec.bullets.length} 行</span>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    const sections = draft.sections.map((s, i) =>
+                      i === si ? { ...s, bullets: [...s.bullets, ''] } : s,
+                    );
+                    setDraft({ ...draft, sections });
+                  }}
+                >
+                  <Plus size={14} /> 增加一行
+                </button>
+              </div>
             </div>
           ))}
         </div>
