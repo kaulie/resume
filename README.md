@@ -75,6 +75,19 @@ npm run dev
 
 保存后即可启用大模型。未启用或调用失败时，自动回退到内置规则引擎。
 
+## 通过部署平台发布
+
+仓库已按部署控制面的约定提供发布入口：
+
+- `build.sh`：产出 `outputs/`（`bin/resume-server` + `scripts/*.sh` + `web/` 前端静态资源）。
+- `scripts/start.sh` / `stop.sh` / `restart.sh`：运行时脚本，绑定平台注入的 `SERVICE_PORT`/`PORT`，pid 与日志落在 `backend/`。
+
+部署控制面在打包时执行 `build.sh`（注入 `APP_VERSION`），把 `outputs/` rsync 到服务的 runtime 目录后调用 `restartCmd`。服务本身：
+
+- 监听平台注入的端口，`/health` 提供探活；
+- 由 Go 后端直接托管前端静态资源与 API（单端口）；
+- 数据持久化到 PostgreSQL（可用 `runtimeEnv` 注入 `DATABASE_URL` 覆盖默认值）。
+
 ## PDF 导出字体
 
 PDF 导出需要单个 `.ttf` 中文字体。默认按以下顺序自动检测：
